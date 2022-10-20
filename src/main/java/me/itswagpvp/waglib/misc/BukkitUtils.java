@@ -9,6 +9,7 @@ import java.util.Collection;
  * @author _ItsWagPvP
  * @since 1.0.0
  */
+@SuppressWarnings("unused")
 public class BukkitUtils {
 
     /**

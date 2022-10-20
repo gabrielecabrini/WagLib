@@ -13,6 +13,7 @@ import java.util.Base64;
  * @author _ItsWagPvP
  * @since 1.0.0
  */
+@SuppressWarnings("unused")
 public class ItemSerializer {
 
     /**

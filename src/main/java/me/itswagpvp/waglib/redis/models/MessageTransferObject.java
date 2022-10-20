@@ -6,9 +6,10 @@ import com.google.gson.GsonBuilder;
 /**
  * @author _ItsWagPvP
  * @since 1.0.0
- * DTO object used for sending data across network. Supports
+ * <p>DTO object used for sending data across network. Supports
  * custom object serialization using {@link Gson}.
  */
+@SuppressWarnings("unused")
 public class MessageTransferObject {
 
     private String senderIdentifier;
@@ -32,20 +33,6 @@ public class MessageTransferObject {
         this.senderIdentifier = senderIdentifier;
         this.message = message;
         this.timestamp = timestamp;
-    }
-
-    /**
-     * Converts current data to JSON using {@link Gson}
-     *
-     * @return Object serialized to JSON String
-     */
-    public String toJson() {
-        try {
-            Gson gson = new GsonBuilder().create();
-            return gson.toJson(this);
-        } catch (Exception ex) {
-            return null;
-        }
     }
 
     /**
@@ -76,6 +63,20 @@ public class MessageTransferObject {
         String message = gson.toJson(objectToWrap);
 
         return new MessageTransferObject(senderIdentifier, message, timestamp);
+    }
+
+    /**
+     * Converts current data to JSON using {@link Gson}
+     *
+     * @return Object serialized to JSON String
+     */
+    public String toJson() {
+        try {
+            Gson gson = new GsonBuilder().create();
+            return gson.toJson(this);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     /**
@@ -115,34 +116,34 @@ public class MessageTransferObject {
     /**
      * Obtains the server sender identifier
      *
-     * @return  Server identifier of the sender
+     * @return Server identifier of the sender
      */
     public String getSenderIdentifier() {
         return senderIdentifier;
     }
 
     /**
-     * Obtains the content of the transferred message
-     *
-     * @return  Content of the message
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
      * Changes the server sender identifier
      *
-     * @param senderIdentifier  New server sender identifier
+     * @param senderIdentifier New server sender identifier
      */
     public void setSenderIdentifier(String senderIdentifier) {
         this.senderIdentifier = senderIdentifier;
     }
 
     /**
+     * Obtains the content of the transferred message
+     *
+     * @return Content of the message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
      * Updates the content of the transferred message
      *
-     * @param message   New transferred message content
+     * @param message New transferred message content
      */
     public void setMessage(String message) {
         this.message = message;

@@ -7,8 +7,9 @@ import redis.clients.jedis.Protocol;
 /**
  * @author _ItsWagPvP
  * @since 1.0.0
- * RedisConfiguration object stores Redis server's credentials. Can be used to create JedisPool instance.
+ * <p>RedisConfiguration object stores Redis server's credentials. Can be used to create JedisPool instance.
  */
+@SuppressWarnings("unused")
 public class RedisConfiguration {
 
     private final String hostName;
@@ -16,8 +17,6 @@ public class RedisConfiguration {
     private final String username;
     private final String password;
     private final boolean ssl;
-
-    /*----------------------------------------------------------------------------------------------------------*/
 
     /**
      * Constructs the instance of the object
@@ -35,8 +34,6 @@ public class RedisConfiguration {
         this.password = password;
         this.ssl = ssl;
     }
-
-    /*----------------------------------------------------------------------------------------------------------*/
 
     /**
      * Creates {@link JedisPool} instance using the stored values.
@@ -58,7 +55,5 @@ public class RedisConfiguration {
             return null;
         }
     }
-
-    /*----------------------------------------------------------------------------------------------------------*/
 
 }

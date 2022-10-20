@@ -1,8 +1,13 @@
 package me.itswagpvp.waglib.plugin;
 
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class WagLib extends JavaPlugin {
+/**
+ * @author _ItsWagPvP
+ * @since 1.0.0
+ */
+public final class WagLib extends JavaPlugin implements Listener {
 
     private static WagLib plugin;
 
@@ -18,6 +23,7 @@ public final class WagLib extends JavaPlugin {
         // Plugin shutdown logic
     }
 
+    @SuppressWarnings("unused")
     public static WagLib getInstance() {
         return plugin;
     }

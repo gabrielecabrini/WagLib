@@ -3,8 +3,9 @@ package me.itswagpvp.waglib.redis.events;
 /**
  * @author _ItsWagPvP
  * @since 1.0.0
- * Redis incoming message Event interface. Used for handling differences between Spigot and Bungee Event API.
+ * <p> Redis incoming message Event interface. Used for handling differences between Spigot and Bungee Event API.
  */
+@SuppressWarnings("unused")
 public interface IRedisMessageReceivedEvent {
 
     /**

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * [!] Works only from 1.16.5 or newer!
  */
+@SuppressWarnings("unused")
 public class PersistentData {
     private final Plugin plugin;
     private final PersistentDataType dataType;

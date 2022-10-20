@@ -17,6 +17,7 @@ import java.util.*;
  * <p>
  * It allows developers to subscribe channels and listen to them using generic EventHandlers.
  */
+@SuppressWarnings("unused")
 public class RedisManager {
     /**
      * Main instance
@@ -27,27 +28,22 @@ public class RedisManager {
      * Plugin which the plugin is associated with
      */
     private final IWagRedisPlugin plugin;
-
-    /**
-     * Configuration object to store credentials
-     */
-    private RedisConfiguration redisConfiguration;
-
-    /**
-     * Current server's identifier. Shall be unique across your network.
-     */
-    private String serverIdentifier;
-
     /**
      * Set of subscribed channels
      */
     private final HashSet<String> channels;
-
     /**
      * List of current subscriptions
      */
     private final List<Subscription> subscriptions;
-
+    /**
+     * Configuration object to store credentials
+     */
+    private RedisConfiguration redisConfiguration;
+    /**
+     * Current server's identifier. Shall be unique across your network.
+     */
+    private String serverIdentifier;
     /**
      * Current JedisPool object
      */
@@ -76,6 +72,28 @@ public class RedisManager {
         this.subscriptions = new ArrayList<>();
 
         this.channels = new HashSet<>();
+    }
+
+    /**
+     * Initialization method for creating {@link RedisManager} main instance. This won't start any
+     * connection or subscription.
+     *
+     * @param plugin             Origin plugin which tries to obtain the instance
+     * @param serverIdentifier   Identifier of the server (e.g. 'Bungee01'). Shall be unique to prevent bugs
+     * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
+     */
+    public static void init(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration) {
+        api = new RedisManager(plugin, serverIdentifier, redisConfiguration);
+    }
+
+    /**
+     * Gets the main instance of {@link RedisManager} object. This is the only
+     * recommended approach to access the API methods.
+     *
+     * @return Main instance of {@link RedisManager}
+     */
+    public static RedisManager getAPI() {
+        return api;
     }
 
     /**
@@ -389,28 +407,6 @@ public class RedisManager {
 
             RedisManager.this.plugin.onMessageReceived(channel, messageTransferObject);
         }
-    }
-
-    /**
-     * Initialization method for creating {@link RedisManager} main instance. This won't start any
-     * connection or subscription.
-     *
-     * @param plugin             Origin plugin which tries to obtain the instance
-     * @param serverIdentifier   Identifier of the server (e.g. 'Bungee01'). Shall be unique to prevent bugs
-     * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
-     */
-    public static void init(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration) {
-        api = new RedisManager(plugin, serverIdentifier, redisConfiguration);
-    }
-
-    /**
-     * Gets the main instance of {@link RedisManager} object. This is the only
-     * recommended approach to access the API methods.
-     *
-     * @return Main instance of {@link RedisManager}
-     */
-    public static RedisManager getAPI() {
-        return api;
     }
 
 }

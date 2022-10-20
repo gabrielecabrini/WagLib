@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
  * @author _ItsWagPvP
  * @since 1.0.0
  */
+@SuppressWarnings("unused")
 public class InventorySerializer {
 
     /**

@@ -9,6 +9,7 @@ import java.util.List;
  * @author _ItsWagPvP
  * @since 1.0.0
  */
+@SuppressWarnings("unused")
 public class ListUtils {
 
     /**

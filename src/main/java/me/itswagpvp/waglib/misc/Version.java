@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
  * @author _ItsWagPvP
  * @since 1.0.0
  */
+@SuppressWarnings("unused")
 public class Version {
 
     /**

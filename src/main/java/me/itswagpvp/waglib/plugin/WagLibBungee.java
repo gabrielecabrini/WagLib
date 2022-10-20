@@ -5,6 +5,8 @@ import net.md_5.bungee.api.plugin.Plugin;
 public class WagLibBungee extends Plugin {
     private static WagLibBungee plugin;
 
+
+
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -20,4 +22,5 @@ public class WagLibBungee extends Plugin {
     public static WagLibBungee getInstance() {
         return plugin;
     }
+
 }
