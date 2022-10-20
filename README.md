@@ -1,13 +1,13 @@
 # WagLib
 General Java API for Minecraft Development
 
-## Redis
+# Redis
 
 If you want to use Redis, be sure to implement correct classes if you're using Spigot/Bukkit or Bungee
 
-# Main class example to load redis
+## Main class example to load redis
  ```Java
- import me.itswagpvp.waglib.redis.events.spigot.AsyncRedisMessageReceivedEvent;
+import me.itswagpvp.waglib.redis.events.spigot.AsyncRedisMessageReceivedEvent;
 import me.itswagpvp.waglib.redis.events.spigot.RedisMessageReceivedEvent;
 import me.itswagpvp.waglib.redis.models.MessageTransferObject;
 import me.itswagpvp.waglib.redis.models.RedisConfiguration;
@@ -78,7 +78,7 @@ public class Example extends JavaPlugin implements IWagRedisPlugin {
 }
  ```
 
-# Register to Redis listener
+## Register to Redis listener
  ```Java
  // Use bungee event import for BungeeCord!!!
 
@@ -114,7 +114,7 @@ public class MyListener implements Listener {
 }
  ```
 
-# Send messages to Redis
+## Send messages to Redis
 
  ```Java
  // For simple messages in String format use #publishMessage method.
