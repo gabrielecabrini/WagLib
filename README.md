@@ -1,4 +1,7 @@
-# WagLib
+# WagLib 
+
+[![](https://jitpack.io/v/ItsWagPvP/WagLib.svg)](https://jitpack.io/#ItsWagPvP/WagLib)
+
 General Java API for Minecraft Development
 
 # Redis
@@ -43,8 +46,6 @@ public class Example extends JavaPlugin implements IWagRedisPlugin {
 
         // Initialize RedisManager instance (singleton)
         // Since init, use RedisManager#getAPI() to obtain the instance
-        // If you want to specify the thread pool size, write it after redisConfiguration
-        // Default one is 5 threads.
         
         redisManager = new RedisManager(this, "server-identifier", redisConfiguration);
 
