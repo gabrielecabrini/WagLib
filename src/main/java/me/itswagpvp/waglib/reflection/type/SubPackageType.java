@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
  * @author _ItsWagPvP
  * @since 1.0.0
  */
+@SuppressWarnings("unused")
 public enum SubPackageType {
     ADVANCEMENT,
     ATTRIBUTE,

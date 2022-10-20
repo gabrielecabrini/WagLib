@@ -9,6 +9,7 @@ import java.util.HashMap;
  * @author _ItsWagPvP
  * @since 1.0.0
  */
+@SuppressWarnings("unused")
 public enum DataType {
     BYTE(byte.class, Byte.class),
     SHORT(short.class, Short.class),

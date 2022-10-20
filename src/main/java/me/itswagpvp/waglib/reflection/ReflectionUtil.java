@@ -15,6 +15,7 @@ import java.util.Objects;
  * @author _ItsWagPvP
  * @since 1.0.0
  */
+@SuppressWarnings("unused")
 public final class ReflectionUtil {
     private static final @NotNull String CRAFTBUKKIT_VERSION;
     private static final @NotNull String NMS_VERSION;

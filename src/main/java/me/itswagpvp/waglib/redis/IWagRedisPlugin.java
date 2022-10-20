@@ -12,13 +12,6 @@ import java.util.logging.Logger;
 public interface IWagRedisPlugin {
 
     /**
-     * Runs asynchronous task
-     *
-     * @param task Task to be run async
-     */
-    void runAsync(Runnable task);
-
-    /**
      * Calls the corresponding events when message was received
      *
      * @param channel               Channel which received the message

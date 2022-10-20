@@ -7,6 +7,8 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author _ItsWagPvP
@@ -55,6 +57,34 @@ public class RedisManager {
     private boolean closing;
 
     /**
+     * Thread pool service
+     */
+    ExecutorService executorService;
+
+    /**
+     * Constructor method for creating {@link RedisManager} instance. Constructor does not subscribe to the channels,
+     * it just stores the provided data for the future.
+     *
+     * @param plugin             Origin plugin which tries to obtain the instance
+     * @param serverIdentifier   Identifier of the server (e.g. 'Bungee01'). Shall be unique to prevent bugs
+     * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
+     * @param threads            Number of threads to use for handling Redis messages
+     */
+    public RedisManager(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration, int threads) {
+        this.plugin = plugin;
+        this.closing = false;
+
+        this.serverIdentifier = serverIdentifier;
+        this.redisConfiguration = redisConfiguration;
+
+        this.subscriptions = new ArrayList<>();
+
+        this.channels = new HashSet<>();
+
+        this.executorService = Executors.newFixedThreadPool(threads);
+    }
+
+    /**
      * Constructor method for creating {@link RedisManager} instance. Constructor does not subscribe to the channels,
      * it just stores the provided data for the future.
      *
@@ -72,6 +102,8 @@ public class RedisManager {
         this.subscriptions = new ArrayList<>();
 
         this.channels = new HashSet<>();
+
+        this.executorService = Executors.newFixedThreadPool(5);
     }
 
     /**
@@ -81,9 +113,10 @@ public class RedisManager {
      * @param plugin             Origin plugin which tries to obtain the instance
      * @param serverIdentifier   Identifier of the server (e.g. 'Bungee01'). Shall be unique to prevent bugs
      * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
+     * @param threads            Number of threads to use for handling Redis messages
      */
-    public static void init(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration) {
-        api = new RedisManager(plugin, serverIdentifier, redisConfiguration);
+    public static void init(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration, int threads) {
+        api = new RedisManager(plugin, serverIdentifier, redisConfiguration, threads);
     }
 
     /**
@@ -131,21 +164,20 @@ public class RedisManager {
      * Note! It does not return false if subscription itself was unsuccessful as the calls are asynchronous.
      *
      * @param channels Default list channels to listen on (case-sensitive), can be empty and provided afterwards
-     * @return Whether the setup was successful
      * @see #subscribe(String...)
      */
-    public boolean setup(String... channels) {
+    public void setup(String... channels) {
         // Check the RedisConfiguration existence
         if (this.redisConfiguration == null) {
             plugin.logger().warning("Cannot establish Jedis Pool! Configuration cannot be null!");
-            return false;
+            return;
         }
 
         // Build the JedisPool
         this.jedisPool = this.redisConfiguration.build();
         if (this.jedisPool == null) {
             plugin.logger().warning("Cannot establish Jedis Pool from the provided configuration!");
-            return false;
+            return;
         }
 
         this.plugin.logger().info("Jedis Pool established with server identifier '" + this.serverIdentifier + "'!");
@@ -155,11 +187,10 @@ public class RedisManager {
             this.channels.addAll(Set.of(channels));
 
             Subscription subscription = new Subscription(this.channels.toArray(new String[0]));
-            this.plugin.runAsync(subscription);
+            executorService.submit(subscription);
             this.subscriptions.add(subscription);
         }
 
-        return true;
     }
 
     /**
@@ -197,13 +228,9 @@ public class RedisManager {
      * @return Whether at least one of the channel was successfully subscribed
      */
     public boolean subscribe(String... channels) {
-        if (this.closing) {
-            return false;
-        }
+        if (this.closing) return false;
 
-        if (channels == null || channels.length == 0) {
-            return false;
-        }
+        if (channels == null || channels.length == 0) return false;
 
         Set<String> actualChannelsToAdd = new HashSet<>();
 
@@ -215,14 +242,12 @@ public class RedisManager {
         }
 
         // Check if user provided any actual channel to subscribe
-        if (actualChannelsToAdd.isEmpty()) {
-            return false;
-        }
+        if (actualChannelsToAdd.isEmpty()) return false;
 
         this.channels.addAll(actualChannelsToAdd);
 
         Subscription subscription = new Subscription(actualChannelsToAdd.toArray(new String[0]));
-        this.plugin.runAsync(subscription);
+        executorService.submit(subscription);
         subscriptions.add(subscription);
 
         return true;
@@ -264,20 +289,14 @@ public class RedisManager {
      * @return Whether the provided {@link MessageTransferObject} makes sense
      */
     private boolean executePublish(String targetChannel, MessageTransferObject messageTransferObject) {
-        if (this.closing) {
-            return false;
-        }
+        if (this.closing) return false;
 
-        if (messageTransferObject == null) {
-            return false;
-        }
+        if (messageTransferObject == null) return false;
 
         String messageJson = messageTransferObject.toJson();
-        if (messageJson == null) {
-            return false;
-        }
+        if (messageJson == null) return false;
 
-        this.plugin.runAsync(() -> {
+        executorService.submit(() -> {
             try (Jedis jedis = this.jedisPool.getResource()) {
                 jedis.publish(targetChannel, messageJson);
             } catch (Exception e) {
@@ -292,22 +311,16 @@ public class RedisManager {
      * Closes the Redis connection and unsubscribes to all channels.
      */
     public void close() {
-        if (this.closing) {
-            return;
-        }
+        if (this.closing) return;
 
         this.closing = true;
         for (Subscription sub : this.subscriptions) {
-            if (sub.isSubscribed()) {
-                sub.unsubscribe();
-            }
+            if (sub.isSubscribed()) sub.unsubscribe();
         }
 
         this.subscriptions.clear();
 
-        if (this.jedisPool == null) {
-            return;
-        }
+        if (this.jedisPool == null) return;
 
         this.jedisPool.destroy();
     }
@@ -367,6 +380,7 @@ public class RedisManager {
                     }
 
                     try {
+                        RedisManager.this.plugin.logger().info("Subscribing to " + Arrays.toString(this.channels));
                         jedis.subscribe(this, channels); // blocking call
                         RedisManager.this.plugin.logger().info("Successfully subscribed channels: " + Arrays.toString(channels) + "!");
                     } catch (Exception e) {
@@ -377,11 +391,10 @@ public class RedisManager {
                         return;
                     }
 
-                    RedisManager.this.plugin.logger().warning("Redis pubsub connection dropped, trying to re-open the connection!");
+                    RedisManager.this.plugin.logger().warning("Redis pubsub connection dropped, trying to re-open the connection!" + e.getMessage());
                     try {
                         unsubscribe();
-                    } catch (Exception ignored) {
-                    }
+                    } catch (Exception ignored) {}
 
                     // Sleep for 5 seconds to prevent massive spam in console
                     try {
@@ -395,9 +408,7 @@ public class RedisManager {
 
         @Override
         public void onMessage(String channel, String message) {
-            if (channel == null || message == null) {
-                return;
-            }
+            if (channel == null || message == null) return;
 
             MessageTransferObject messageTransferObject = MessageTransferObject.fromJson(message);
             if (messageTransferObject == null) {
