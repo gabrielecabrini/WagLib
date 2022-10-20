@@ -68,7 +68,6 @@ public class RedisManager {
      * @param plugin             Origin plugin which tries to obtain the instance
      * @param serverIdentifier   Identifier of the server (e.g. 'Bungee01'). Shall be unique to prevent bugs
      * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
-     * @param threads            Number of threads to use for handling Redis messages
      */
     public RedisManager(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration) {
         this.plugin = plugin;
@@ -257,6 +256,23 @@ public class RedisManager {
     public boolean publishMessage(String targetChannel, String messageToPublish) {
         MessageTransferObject messageTransferObject = new MessageTransferObject(this.serverIdentifier, messageToPublish, System.currentTimeMillis());
         return this.executePublish(targetChannel, messageTransferObject);
+    }
+
+    /**
+     * Executes the publish process. This method is used internally by {@link #publishObject(String, Object)} and {@link #publishMessage(String, String)}.
+     * @param key Key to be published into (case-sensitive)
+     * @param values Values to be published
+     */
+    public void setAdd(String key, String... values) {
+        jedisPool.getResource().sadd(key, values);
+    }
+
+    /**
+     * Executes the remove process. This method is used internally by {@link #publishObject(String, Object)} and {@link #publishMessage(String, String)}.
+     * @param key Key to be removed (case-sensitive)
+     */
+    public void removeSet(String key) {
+        jedisPool.getResource().srem(key);
     }
 
     /**
