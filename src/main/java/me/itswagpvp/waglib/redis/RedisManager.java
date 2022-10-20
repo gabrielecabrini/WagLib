@@ -70,28 +70,6 @@ public class RedisManager {
      * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
      * @param threads            Number of threads to use for handling Redis messages
      */
-    public RedisManager(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration, int threads) {
-        this.plugin = plugin;
-        this.closing = false;
-
-        this.serverIdentifier = serverIdentifier;
-        this.redisConfiguration = redisConfiguration;
-
-        this.subscriptions = new ArrayList<>();
-
-        this.channels = new HashSet<>();
-
-        this.executorService = Executors.newFixedThreadPool(threads);
-    }
-
-    /**
-     * Constructor method for creating {@link RedisManager} instance. Constructor does not subscribe to the channels,
-     * it just stores the provided data for the future.
-     *
-     * @param plugin             Origin plugin which tries to obtain the instance
-     * @param serverIdentifier   Identifier of the server (e.g. 'Bungee01'). Shall be unique to prevent bugs
-     * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
-     */
     public RedisManager(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration) {
         this.plugin = plugin;
         this.closing = false;
@@ -103,7 +81,7 @@ public class RedisManager {
 
         this.channels = new HashSet<>();
 
-        this.executorService = Executors.newFixedThreadPool(5);
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     /**
@@ -116,7 +94,7 @@ public class RedisManager {
      * @param threads            Number of threads to use for handling Redis messages
      */
     public static void init(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration, int threads) {
-        api = new RedisManager(plugin, serverIdentifier, redisConfiguration, threads);
+        api = new RedisManager(plugin, serverIdentifier, redisConfiguration);
     }
 
     /**
