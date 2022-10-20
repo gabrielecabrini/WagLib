@@ -82,7 +82,7 @@ public class Example extends JavaPlugin implements IWagRedisPlugin {
  ```Java
  // Use bungee event import for BungeeCord!!!
 
-import me.itswagpvp.waglib.redis.events.AsyncRedisMessageReceivedEvent;
+import me.itswagpvp.waglib.redis.events.spigot.AsyncRedisMessageReceivedEvent;
 
 public class MyListener implements Listener {
 
