@@ -1,0 +1,5 @@
+name: WagLib
+version: '${project.version}'
+main: me.itswagpvp.waglib.plugin.WagLib
+api-version: 1.13
+authors: [_ItsWagPvP]
