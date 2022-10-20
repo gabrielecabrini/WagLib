@@ -43,8 +43,6 @@ public class Example extends JavaPlugin implements IWagRedisPlugin {
 
         // Initialize RedisManager instance (singleton)
         // Since init, use RedisManager#getAPI() to obtain the instance
-        // If you want to specify the thread pool size, write it after redisConfiguration
-        // Default one is 5 threads.
         
         redisManager = new RedisManager(this, "server-identifier", redisConfiguration);
 
