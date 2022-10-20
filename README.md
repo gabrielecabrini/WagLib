@@ -43,17 +43,14 @@ public class Example extends JavaPlugin implements IWagRedisPlugin {
 
         // Initialize RedisManager instance (singleton)
         // Since init, use RedisManager#getAPI() to obtain the instance
+        // If you want to specify the thread pool size, write it after redisConfiguration
+        // Default one is 5 threads.
+        
         redisManager = new RedisManager(this, "server-identifier", redisConfiguration);
 
         // Now setup the connection
         redisManager.setup("channel1", "channel2", "channel3");
-        redisManager.subscribe("channel1", "channel2", "channel3");
 
-    }
-
-    @Override
-    public void runAsync(Runnable task) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, task);
     }
 
     @Override
