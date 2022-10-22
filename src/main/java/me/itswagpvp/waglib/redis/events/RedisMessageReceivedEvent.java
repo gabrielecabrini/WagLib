@@ -6,7 +6,7 @@ package me.itswagpvp.waglib.redis.events;
  * <p> Redis incoming message Event interface. Used for handling differences between Spigot and Bungee Event API.
  */
 @SuppressWarnings("unused")
-public interface IRedisMessageReceivedEvent {
+public interface RedisMessageReceivedEvent {
 
     /**
      * Obtains the sender's identifier
@@ -44,13 +44,5 @@ public interface IRedisMessageReceivedEvent {
      * @return Parsed object (null if it cannot be parsed)
      */
     <T> T getMessageObject(Class<T> objectClass);
-
-    /**
-     * Checks if the sender server has the same identifier as current server
-     *
-     * @return Whether the message was sent by this server
-     */
-    boolean isSelfSender();
-
 
 }

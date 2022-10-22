@@ -36,15 +36,28 @@ public class RedisConfiguration {
     }
 
     /**
+     * Constructs the instance of the object
+     *
+     * @param hostName Hostname of the Redis server
+     * @param port     Port of the Redis server
+     * @param ssl      Whether to make the connection with SSL
+     */
+    public RedisConfiguration(String hostName, int port, boolean ssl) {
+        this.hostName = hostName;
+        this.port = port;
+        this.username = null;
+        this.password = null;
+        this.ssl = ssl;
+    }
+
+    /**
      * Creates {@link JedisPool} instance using the stored values.
      *
      * @return {@link JedisPool} object obtained using the values stored inside this object.
      */
     public JedisPool build() {
         // Hostname must exist!
-        if (hostName == null) {
-            return null;
-        }
+        if (hostName == null) return null;
 
         try {
             if (this.username == null) {

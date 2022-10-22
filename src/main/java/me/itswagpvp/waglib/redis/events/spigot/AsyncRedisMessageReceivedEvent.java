@@ -1,7 +1,6 @@
 package me.itswagpvp.waglib.redis.events.spigot;
 
-import me.itswagpvp.waglib.redis.RedisManager;
-import me.itswagpvp.waglib.redis.events.IRedisMessageReceivedEvent;
+import me.itswagpvp.waglib.redis.events.RedisMessageReceivedEvent;
 import me.itswagpvp.waglib.redis.models.MessageTransferObject;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -15,7 +14,7 @@ import org.bukkit.event.HandlerList;
  * Data can be changed, so sync Spigot Event will be triggered with updated data
  */
 @SuppressWarnings("unused")
-public class AsyncRedisMessageReceivedEvent extends Event implements IRedisMessageReceivedEvent, Cancellable {
+public class AsyncRedisMessageReceivedEvent extends Event implements RedisMessageReceivedEvent, Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
     private boolean cancelled;
@@ -77,11 +76,6 @@ public class AsyncRedisMessageReceivedEvent extends Event implements IRedisMessa
     @Override
     public <T> T getMessageObject(Class<T> objectClass) {
         return this.messageTransferObject.parseMessageObject(objectClass);
-    }
-
-    @Override
-    public boolean isSelfSender() {
-        return this.messageTransferObject.getSenderIdentifier().equals(RedisManager.getAPI().getServerIdentifier());
     }
 
     @Override

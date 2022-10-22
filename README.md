@@ -19,7 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
-public class Example extends JavaPlugin implements IWagRedisPlugin {
+public class Example extends JavaPlugin implements RedisPlugin {
 
     private RedisManager redisManager;
 
@@ -32,6 +32,12 @@ public class Example extends JavaPlugin implements IWagRedisPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        
+        
+        // You should close your Redis connection
+        // This will also close every created thread
+        redisManager.close();
+        
     }
 
     public void loadRedis() {

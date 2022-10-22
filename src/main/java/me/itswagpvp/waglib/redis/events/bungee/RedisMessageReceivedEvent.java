@@ -1,7 +1,5 @@
 package me.itswagpvp.waglib.redis.events.bungee;
 
-import me.itswagpvp.waglib.redis.RedisManager;
-import me.itswagpvp.waglib.redis.events.IRedisMessageReceivedEvent;
 import me.itswagpvp.waglib.redis.models.MessageTransferObject;
 import net.md_5.bungee.api.plugin.Event;
 
@@ -11,7 +9,7 @@ import net.md_5.bungee.api.plugin.Event;
  * BungeeCord Event class used when message was received from subscribed channel.
  */
 @SuppressWarnings("unused")
-public class RedisMessageReceivedEvent extends Event implements IRedisMessageReceivedEvent {
+public class RedisMessageReceivedEvent extends Event implements me.itswagpvp.waglib.redis.events.RedisMessageReceivedEvent {
 
     /**
      * Name of the channel the message came from
@@ -52,11 +50,6 @@ public class RedisMessageReceivedEvent extends Event implements IRedisMessageRec
     @Override
     public <T> T getMessageObject(Class<T> objectClass) {
         return this.messageTransferObject.parseMessageObject(objectClass);
-    }
-
-    @Override
-    public boolean isSelfSender() {
-        return this.messageTransferObject.getSenderIdentifier().equals(RedisManager.getAPI().getServerIdentifier());
     }
 
     @Override

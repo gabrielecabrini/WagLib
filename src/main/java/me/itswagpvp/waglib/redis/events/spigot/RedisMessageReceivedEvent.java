@@ -1,7 +1,5 @@
 package me.itswagpvp.waglib.redis.events.spigot;
 
-import me.itswagpvp.waglib.redis.RedisManager;
-import me.itswagpvp.waglib.redis.events.IRedisMessageReceivedEvent;
 import me.itswagpvp.waglib.redis.models.MessageTransferObject;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -12,7 +10,7 @@ import org.bukkit.event.HandlerList;
  * Spigot Event class used when message was received from subscribed channel.
  */
 @SuppressWarnings("unused")
-public class RedisMessageReceivedEvent extends Event implements IRedisMessageReceivedEvent {
+public class RedisMessageReceivedEvent extends Event implements me.itswagpvp.waglib.redis.events.RedisMessageReceivedEvent {
     private static final HandlerList HANDLERS = new HandlerList();
 
     /**
@@ -58,11 +56,6 @@ public class RedisMessageReceivedEvent extends Event implements IRedisMessageRec
     @Override
     public <T> T getMessageObject(Class<T> objectClass) {
         return this.messageTransferObject.parseMessageObject(objectClass);
-    }
-
-    @Override
-    public boolean isSelfSender() {
-        return this.messageTransferObject.getSenderIdentifier().equals(RedisManager.getAPI().getServerIdentifier());
     }
 
     @Override

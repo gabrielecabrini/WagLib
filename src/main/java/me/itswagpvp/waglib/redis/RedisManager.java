@@ -24,12 +24,12 @@ public class RedisManager {
     /**
      * Main instance
      */
-    private static RedisManager api;
+    private RedisManager api;
 
     /**
      * Plugin which the plugin is associated with
      */
-    private final IWagRedisPlugin plugin;
+    private final RedisPlugin plugin;
     /**
      * Set of subscribed channels
      */
@@ -69,7 +69,7 @@ public class RedisManager {
      * @param serverIdentifier   Identifier of the server (e.g. 'Bungee01'). Shall be unique to prevent bugs
      * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
      */
-    public RedisManager(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration) {
+    public RedisManager(RedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration) {
         this.plugin = plugin;
         this.closing = false;
 
@@ -92,7 +92,7 @@ public class RedisManager {
      * @param redisConfiguration {@link RedisConfiguration} object with Redis server credentials
      * @param threads            Number of threads to use for handling Redis messages
      */
-    public static void init(IWagRedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration, int threads) {
+    private void init(RedisPlugin plugin, String serverIdentifier, RedisConfiguration redisConfiguration, int threads) {
         api = new RedisManager(plugin, serverIdentifier, redisConfiguration);
     }
 
@@ -102,8 +102,15 @@ public class RedisManager {
      *
      * @return Main instance of {@link RedisManager}
      */
-    public static RedisManager getAPI() {
+    public RedisManager getAPI() {
         return api;
+    }
+
+    /**
+     * @return Current {@link JedisPool} instance
+     */
+    public JedisPool getJedisPool() {
+        return jedisPool;
     }
 
     /**
@@ -117,12 +124,9 @@ public class RedisManager {
         this.close();
         this.closing = false;
 
-        if (serverIdentifier != null) {
-            this.serverIdentifier = serverIdentifier;
-        }
-        if (redisConfiguration != null) {
-            this.redisConfiguration = redisConfiguration;
-        }
+        if (serverIdentifier != null) this.serverIdentifier = serverIdentifier;
+
+        if (redisConfiguration != null) this.redisConfiguration = redisConfiguration;
 
         if (keepChannels) {
             String[] channels = this.channels.toArray(String[]::new);
@@ -176,18 +180,12 @@ public class RedisManager {
      * @param channels Names of the channels to unsubscribe (case-sensitive)
      */
     public void unsubscribe(String... channels) {
-        if (this.closing) {
-            return;
-        }
+        if (this.closing) return;
 
-        if (channels == null || channels.length == 0) {
-            return;
-        }
+        if (channels == null || channels.length == 0) return;
 
         try {
-            for (Subscription sub : this.subscriptions) {
-                sub.unsubscribe(channels);
-            }
+            for (Subscription sub : this.subscriptions) sub.unsubscribe(channels);
             this.plugin.logger().info("Successfully unsubscribed channels: " + Arrays.toString(channels) + "!");
         } catch (Exception ex) {
             this.plugin.logger().warning("An error occurred while unsubscribing channels: " + Arrays.toString(channels) + "!");
@@ -212,9 +210,7 @@ public class RedisManager {
         Set<String> actualChannelsToAdd = new HashSet<>();
 
         for (String channel : channels) {
-            if (this.channels.contains(channel) && channel != null) {
-                continue;
-            }
+            if (this.channels.contains(channel) && channel != null) continue;
             actualChannelsToAdd.add(channel);
         }
 
@@ -236,12 +232,13 @@ public class RedisManager {
      *
      * @param targetChannel   Channel to be published into (case-sensitive)
      * @param objectToPublish Object to be published
-     * @return Returns 'false' if the message cannot be converted to JSON or in closing state. Returns 'true' if the process was successful
      * @see #publishMessage(String, String)
      */
-    public boolean publishObject(String targetChannel, Object objectToPublish) {
-        MessageTransferObject messageTransferObject = MessageTransferObject.wrap(this.serverIdentifier, objectToPublish, System.currentTimeMillis());
-        return this.executePublish(targetChannel, messageTransferObject);
+    public void publishObject(String targetChannel, Object objectToPublish) {
+        executorService.submit(() -> {
+            MessageTransferObject messageTransferObject = MessageTransferObject.wrap(this.serverIdentifier, objectToPublish, System.currentTimeMillis());
+            executePublish(targetChannel, messageTransferObject);
+        });
     }
 
     /**
@@ -250,29 +247,13 @@ public class RedisManager {
      *
      * @param targetChannel    Channel to be published into (case-sensitive)
      * @param messageToPublish The message to be published
-     * @return Returns 'false' if the message cannot be converted to JSON or in closing state. Returns 'true' if the process was successful.
      * @see #publishObject(String, Object)
      */
-    public boolean publishMessage(String targetChannel, String messageToPublish) {
-        MessageTransferObject messageTransferObject = new MessageTransferObject(this.serverIdentifier, messageToPublish, System.currentTimeMillis());
-        return this.executePublish(targetChannel, messageTransferObject);
-    }
-
-    /**
-     * Executes the publish process. This method is used internally by {@link #publishObject(String, Object)} and {@link #publishMessage(String, String)}.
-     * @param key Key to be published into (case-sensitive)
-     * @param values Values to be published
-     */
-    public void setAdd(String key, String... values) {
-        jedisPool.getResource().sadd(key, values);
-    }
-
-    /**
-     * Executes the remove process. This method is used internally by {@link #publishObject(String, Object)} and {@link #publishMessage(String, String)}.
-     * @param key Key to be removed (case-sensitive)
-     */
-    public void removeSet(String key) {
-        jedisPool.getResource().srem(key);
+    public void publishMessage(String targetChannel, String messageToPublish) {
+        executorService.submit(() -> {
+            MessageTransferObject messageTransferObject = new MessageTransferObject(this.serverIdentifier, messageToPublish, System.currentTimeMillis());
+            executePublish(targetChannel, messageTransferObject);
+        });
     }
 
     /**
@@ -280,15 +261,14 @@ public class RedisManager {
      *
      * @param targetChannel         Channel to be published into
      * @param messageTransferObject The {@link MessageTransferObject} object to be published
-     * @return Whether the provided {@link MessageTransferObject} makes sense
      */
-    private boolean executePublish(String targetChannel, MessageTransferObject messageTransferObject) {
-        if (this.closing) return false;
+    private void executePublish(String targetChannel, MessageTransferObject messageTransferObject) {
+        if (this.closing) return;
 
-        if (messageTransferObject == null) return false;
+        if (messageTransferObject == null) return;
 
         String messageJson = messageTransferObject.toJson();
-        if (messageJson == null) return false;
+        if (messageJson == null) return;
 
         executorService.submit(() -> {
             try (Jedis jedis = this.jedisPool.getResource()) {
@@ -298,7 +278,6 @@ public class RedisManager {
             }
         });
 
-        return true;
     }
 
     /**
@@ -308,15 +287,17 @@ public class RedisManager {
         if (this.closing) return;
 
         this.closing = true;
-        for (Subscription sub : this.subscriptions) {
-            if (sub.isSubscribed()) sub.unsubscribe();
-        }
+        for (Subscription sub : this.subscriptions) if (sub.isSubscribed()) sub.unsubscribe();
 
         this.subscriptions.clear();
 
         if (this.jedisPool == null) return;
 
         this.jedisPool.destroy();
+
+        // Closes every created thread
+        getExecutorService().shutdownNow();
+
     }
 
     /**
@@ -347,6 +328,10 @@ public class RedisManager {
         return channels;
     }
 
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
+
     /**
      * Private subscription class used for handling PubSub connection.
      *
@@ -369,9 +354,7 @@ public class RedisManager {
                     if (firstTry) {
                         RedisManager.this.plugin.logger().info("Redis pubsub connection established!");
                         firstTry = false;
-                    } else {
-                        RedisManager.this.plugin.logger().info("Redis pubsub connection re-established!");
-                    }
+                    } else RedisManager.this.plugin.logger().info("Redis pubsub connection re-established!");
 
                     try {
                         RedisManager.this.plugin.logger().info("Subscribing to " + Arrays.toString(this.channels));
@@ -381,14 +364,13 @@ public class RedisManager {
                         RedisManager.this.plugin.logger().warning("Could not subscribe!");
                     }
                 } catch (Exception e) {
-                    if (RedisManager.this.closing) {
-                        return;
-                    }
+                    if (RedisManager.this.closing) return;
 
                     RedisManager.this.plugin.logger().warning("Redis pubsub connection dropped, trying to re-open the connection!" + e.getMessage());
                     try {
                         unsubscribe();
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
 
                     // Sleep for 5 seconds to prevent massive spam in console
                     try {

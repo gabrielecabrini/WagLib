@@ -14,8 +14,12 @@ public final class WagLib extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         plugin = this;
-        plugin.getLogger().info("WagLib has been enabled!");
+        plugin.getLogger().info("WagLib " + plugin.getDescription().getVersion() + " has been enabled!");
+    }
 
+    @Override
+    public void onDisable() {
+        // Plugin shutdown logic
     }
 
     @SuppressWarnings("unused")

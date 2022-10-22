@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
-public interface IWagRedisPlugin {
+public interface RedisPlugin {
 
     /**
      * Calls the corresponding events when message was received
