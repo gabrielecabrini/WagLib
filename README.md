@@ -1,5 +1,7 @@
 # WagLib [![](https://jitpack.io/v/ItsWagPvP/WagLib.svg)](https://jitpack.io/#ItsWagPvP/WagLib)
 
+![Logo](https://user-images.githubusercontent.com/71121134/197420426-3b53da69-b8f9-4b2b-bf06-aa75becaf7a8.gif)
+
 ## bStats Bukkit/Spigot Metrics
 ![bStats Bukkit Metrics](https://bstats.org/signatures/bukkit/WagLib.svg "bStats Bukkit Metrics")
 
