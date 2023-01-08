@@ -1,3 +1,4 @@
 name: WagLibBungee
 version: '${project.version}'
+author: '_ItsWagPvP'
 main: me.itswagpvp.waglib.plugin.WagLibBungee
