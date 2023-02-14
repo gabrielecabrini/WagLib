@@ -87,7 +87,7 @@ public final class ReflectionUtil {
      * Gets the version suffix of the Minecraft Server package.
      * <p>
      * The suffix might be blank depending on the server version the lib is running. For example: in versions newer or
-     * equal to 1.17 there is no suffix, so this is subject to change in any version.}
+     * equal to 1.17 there is no suffix, so this is subject to change in any version.
      * if you're looking for the running server version.
      *
      * @return The suffix of net.minecraft.server package, blank if there isn't one.
