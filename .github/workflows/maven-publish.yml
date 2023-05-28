@@ -6,7 +6,7 @@ on:
 
 jobs: 
   build_jar:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: eric2788/maven-jar-publish@master
